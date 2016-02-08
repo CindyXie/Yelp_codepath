@@ -8,11 +8,19 @@
 
 import UIKit
 
-class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
-    var businesses: [Business]!
+    var businesses: [Business] = [] {
+        didSet {
+            updateFiltedBusinesses()
+        }
+    }
+    var filteredBusinesses: [Business] = []
+    let searchBar = UISearchBar()
+
     
     @IBOutlet weak var tabelView: UITableView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -20,9 +28,14 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         tabelView.dataSource = self
         tabelView.rowHeight = UITableViewAutomaticDimension
         tabelView.estimatedRowHeight = 120
-
+        searchBar.delegate = self
+                
+        navigationItem.titleView = searchBar
+        
         Business.searchWithTerm("Thai", completion: { (businesses: [Business]!, error: NSError!) -> Void in
+            
             self.businesses = businesses
+            
             self.tabelView.reloadData()
             for business in businesses {
                 print(business.name!)
@@ -40,27 +53,52 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
             }
         }
 */
+
+            }
+
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        updateFiltedBusinesses()
+        tabelView.reloadData()
+    }
+    
+    func updateFiltedBusinesses() {
+        let searchText = searchBar.text ?? ""
+        // When there is no text, filteredData is the same as the original data
+        if searchText.isEmpty {
+            filteredBusinesses = businesses
+        } else {
+            // The user has entered text into the search box
+            // Use the filter method to iterate over all items in the data array
+            // For each item, return true if the item should be included and false if the
+            // item should NOT be included
+            filteredBusinesses = businesses.filter({business in
+                // If dataItem matches the searchText, return true to include it
+                if let name = business.name {
+                    return name.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil
+                }
+                return false
+            })
+        }
     }
 
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if businesses != nil {
-            return businesses!.count
-        } else {
-            return 0
+            return filteredBusinesses.count
         }
-    }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tabelView.dequeueReusableCellWithIdentifier("BusinessCell", forIndexPath: indexPath) as! BusinessCell
-        cell.business = businesses[indexPath.row];
+        cell.business = filteredBusinesses[indexPath.row];
         
         return cell
     }
+    
+    
 
     /*
     // MARK: - Navigation
