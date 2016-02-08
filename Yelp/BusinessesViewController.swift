@@ -8,7 +8,7 @@
 
 import UIKit
 
-class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate, UIScrollViewDelegate{
+class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
     var businesses: [Business] = [] {
         didSet {
@@ -17,9 +17,10 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
     }
     var filteredBusinesses: [Business] = []
     let searchBar = UISearchBar()
-    var isMoreDataLoading = false
+    var isDataLoading = false
 
-
+    let pageSize = 20
+    var currentPage = -1
     
     @IBOutlet weak var tabelView: UITableView!
     
@@ -33,17 +34,8 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         searchBar.delegate = self
         
         navigationItem.titleView = searchBar
-        
-        Business.searchWithTerm("Thai", completion: { (businesses: [Business]!, error: NSError!) -> Void in
-            
-            self.businesses = businesses
-            
-            self.tabelView.reloadData()
-            for business in businesses {
-                print(business.name!)
-                print(business.address!)
-            }
-        })
+        loadNextPage()
+
 
 /* Example of Yelp search with more search options specified
         Business.searchWithTerm("Restaurants", sort: .Distance, categories: ["asianfusion", "burgers"], deals: true) { (businesses: [Business]!, error: NSError!) -> Void in
@@ -57,18 +49,26 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
 */
 
             }
+    
+    func loadNextPage() {
+        if isDataLoading {
+            return
+        }
+        
+        currentPage += 1
+        isDataLoading = true
+        Business.searchWithTerm("Thai", offset: currentPage * pageSize, limit: pageSize) { businesses, error in
+            self.businesses += businesses
+            self.tabelView.reloadData()
+            self.isDataLoading = false
+        }
+    }
 
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         updateFiltedBusinesses()
         tabelView.reloadData()
     }
-    
-//    func scrollViewDidScroll(scrollView: UIScrollView) {
-//        if (!isMoreDataLoading) {
-//            isMoreDataLoading = true
-//        }
-//        
-//    }
+
     
     func updateFiltedBusinesses() {
         let searchText = searchBar.text ?? ""
@@ -107,6 +107,12 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         return cell
     }
     
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        if scrollView.contentOffset.y + scrollView.frame.height > scrollView.contentSize.height {
+            loadNextPage()
+        }
+        
+    }
     
 
     /*
