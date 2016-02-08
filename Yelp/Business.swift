@@ -20,6 +20,7 @@ class Business: NSObject {
     init(dictionary: NSDictionary) {
         name = dictionary["name"] as? String
         
+    
         let imageURLString = dictionary["image_url"] as? String
         if imageURLString != nil {
             imageURL = NSURL(string: imageURLString!)!
@@ -89,6 +90,6 @@ class Business: NSObject {
     }
     
     class func searchWithTerm(term: String, sort: YelpSortMode?, categories: [String]?, deals: Bool?, completion: ([Business]!, NSError!) -> Void) -> Void {
-        YelpClient.sharedInstance.searchWithTerm(term, sort: sort, categories: categories, deals: deals, completion: completion)
+        YelpClient.sharedInstance.searchWithTerm(term, sort: sort, categories: categories, deals: deals,  completion: completion)
     }
 }

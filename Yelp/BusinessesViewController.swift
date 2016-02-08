@@ -8,7 +8,7 @@
 
 import UIKit
 
-class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
+class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate, UIScrollViewDelegate{
 
     var businesses: [Business] = [] {
         didSet {
@@ -17,6 +17,8 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
     }
     var filteredBusinesses: [Business] = []
     let searchBar = UISearchBar()
+    var isMoreDataLoading = false
+
 
     
     @IBOutlet weak var tabelView: UITableView!
@@ -29,7 +31,7 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         tabelView.rowHeight = UITableViewAutomaticDimension
         tabelView.estimatedRowHeight = 120
         searchBar.delegate = self
-                
+        
         navigationItem.titleView = searchBar
         
         Business.searchWithTerm("Thai", completion: { (businesses: [Business]!, error: NSError!) -> Void in
@@ -60,6 +62,13 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         updateFiltedBusinesses()
         tabelView.reloadData()
     }
+    
+//    func scrollViewDidScroll(scrollView: UIScrollView) {
+//        if (!isMoreDataLoading) {
+//            isMoreDataLoading = true
+//        }
+//        
+//    }
     
     func updateFiltedBusinesses() {
         let searchText = searchBar.text ?? ""

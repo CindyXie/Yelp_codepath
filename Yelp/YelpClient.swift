@@ -73,6 +73,14 @@ class YelpClient: BDBOAuth1RequestOperationManager {
             parameters["deals_filter"] = deals!
         }
         
+//        if offset != nil {
+//            parameters["offset"] = offset!
+//        }
+//        
+//        if limit != nil {
+//            parameters["limit"] = limit!
+//        }
+        
         print(parameters)
         
         return self.GET("search", parameters: parameters, success: { (operation: AFHTTPRequestOperation!, response: AnyObject!) -> Void in
